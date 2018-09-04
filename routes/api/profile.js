@@ -3,6 +3,9 @@ const router = express.Router()
 const mongoose = require('mongoose')
 const passport = require('passport')
 
+// Load Validation
+const validateProfileInput = require('../../validation/profile')
+
 // Load Profile Model
 const Profile = require('../../models/Profile')
 
@@ -24,6 +27,7 @@ router.get('/',
 
   Profile
     .findOne({ user: request.user.id })
+    .populate('user', ['name', 'avatar'])
     .then(profile => {
       if(!profile) {
         errors.noprofile = 'There is no profile for this user'
@@ -40,19 +44,28 @@ router.get('/',
 router.post('/',
   passport.authenticate('jwt', { session: false }),
   (request, response) => {
+    const { errors, isValid } = validateProfileInput(request.body)
+
+    // Check Validation
+    if(!isValid) {
+      // Return any errors with 400 status
+      return response.status(400).json(errors)
+    }
+
     // Get fields
-    const profileFields = {}
-    profileFields.user = request.user.id
-    if(request.body.handle) profileFields.handle = request.body.handle
-    if(request.body.company) profileFields.company = request.body.company
-    if(request.body.website) profileFields.website = request.body.website
-    if(request.body.location) profileFields.location = request.body.location
-    if(request.body.status) profileFields.status = request.body.status
-    if(request.body.bio) profileFields.bio = request.body.bio
-    if(request.body.githubusername) profileFields.githubusername = request.body.githubusername
-    // Skills - Split into array
-    if(typeof request.body.skills !== 'undefined') {
-      profileFields.skills = request.body.skills.split(',')
+    const profileFields = {};
+    profileFields.user = request.user.id;
+    if (request.body.handle) profileFields.handle = request.body.handle;
+    if (request.body.company) profileFields.company = request.body.company;
+    if (request.body.website) profileFields.website = request.body.website;
+    if (request.body.location) profileFields.location = request.body.location;
+    if (request.body.bio) profileFields.bio = request.body.bio;
+    if (request.body.status) profileFields.status = request.body.status;
+    if (request.body.githubusername)
+      profileFields.githubusername = request.body.githubusername;
+    // Skills - Spilt into array
+    if (typeof request.body.skills !== 'undefined') {
+      profileFields.skills = request.body.skills.split(',');
     }
 
     // Social
