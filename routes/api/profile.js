@@ -29,6 +29,7 @@ router.get('/',
 
   Profile
     .findOne({ user: request.user.id })
+    .populate('user', ['name', 'avatar'])
     .then(profile => {
       if(!profile) {
         errors.noprofile = 'There is no profile for this user'
@@ -107,6 +108,14 @@ router.get('/user/:user_id', (request, response) => {
 router.post('/',
   passport.authenticate('jwt', { session: false }),
   (request, response) => {
+    const { errors, isValid } = validateProfileInput(request.body)
+
+    // Check Validation
+    if(!isValid) {
+      // Return any errors with 400 status
+      return response.status(400).json(errors)
+    }
+
     // Get fields
     const profileFields = {}
     profileFields.user = request.user.id
