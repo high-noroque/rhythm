@@ -84,4 +84,58 @@ router.delete('/:id', passport.authenticate('jwt', { session: false}), (request,
     })
 })
 
+// @route  POST api/posts/like/:id
+// @desc   Like post
+// @access Private
+router.post('/like/:id', passport.authenticate('jwt', { session: false}), (request, response) => {
+  Profile
+    .findOne({ user: request.user.id })
+    .then(profile => {
+      Post
+        .findById(request.params.id)
+        .then(post => {
+          if(post.likes.filter(like => like.user.toString() === request.user.id).length > 0) {
+            return response.status(400).json({ alreadyliked: 'You already like this post'})
+          }
+
+          // Add user id to the likes array
+          post.likes.unshift({ user: request.user.id })
+
+          post.save().then(post => response.json(post))
+        })
+        .catch(error => response.status(404).json({ postnotfound: 'No post found'}))
+        })
+  }
+)
+
+// @route  POST api/posts/unlike/:id
+// @desc   Unlike post
+// @access Private
+router.post('/unlike/:id', passport.authenticate('jwt', { session: false}), (request, response) => {
+    Profile
+      .findOne({ user: request.user.id })
+      .then(profile => {
+        Post
+          .findById(request.params.id)
+          .then(post => {
+            if(post.likes.filter(like => like.user.toString() === request.user.id).length === 0) {
+              return response.status(400).json({ notliked: 'How in the fuck do you expect to unlike a post that you didn\'t like in the first place?!?!' })
+            }
+
+            // Get remove index
+            const removeIndex = post.likes
+              .map(item => item.user.toString())
+              .indexOf(request.user.id)
+
+            // Splice it out of the array
+            post.likes.splice(removeIndex, 1)
+
+            // Sava
+            post.save().then(post => response.json(post))
+          })
+          .catch(error => response.status(404).json({ postnotfound: 'No post found'}))
+      })
+  }
+)
+
 module.exports = router
