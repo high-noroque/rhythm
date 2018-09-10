@@ -6,6 +6,9 @@ const passport = require('passport')
 // Post model
 const Post = require('../../models/Post')
 
+// Post model
+const Profile = require('../../models/Profile')
+
 // Validation
 const validatePostInput = require('../../validation/post')
 
@@ -55,6 +58,30 @@ router.post('/', passport.authenticate('jwt', { session: false}), (request, resp
   })
 
   newPost.save().then(post => response.json(post))
+})
+
+// @route  DELETE api/posts/:id
+// @desc   Delete post
+// @access Private
+router.delete('/:id', passport.authenticate('jwt', { session: false}), (request, response) => {
+  Profile
+    .findOne({ user: request.user.id })
+    .then(profile => {
+      Post
+        .findById(request.params.id)
+        .then(post => {
+          // Check for post owner
+          if(post.user.toString() !== request.user.id) {
+            return response.status(401).json({ notauthorized: 'Why in the fuck would you want to delete a post that\'s not even yours! Get fucked!' })
+          }
+
+          // Delete
+          post
+            .remove()
+            .then(() => response.json({ success: true }))
+            .catch(error => response.status(404).json({ postnotfound: 'No post found'}))
+        })
+    })
 })
 
 module.exports = router
