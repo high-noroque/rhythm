@@ -27,8 +27,8 @@ class Landing extends Component {
           </div>
         </div>
       </div>
-    );
+    )
   }
 }
 
-export default Landing;
+export default Landing
