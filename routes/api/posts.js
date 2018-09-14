@@ -72,7 +72,7 @@ router.delete('/:id', passport.authenticate('jwt', { session: false}), (request,
         .then(post => {
           // Check for post owner
           if(post.user.toString() !== request.user.id) {
-            return response.status(401).json({ notauthorized: 'Why in the fuck would you want to delete a post that\'s not even yours! Get fucked!' })
+            return response.status(401).json({ notauthorized: 'Why in the fuck would you want to delete a post that\'s not even yours? Get fucked!' })
           }
 
           // Delete
