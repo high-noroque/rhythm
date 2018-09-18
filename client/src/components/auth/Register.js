@@ -15,8 +15,8 @@ class Register extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if(nextProps.errors) {
-      this.setState({ errors: nextProps.errors })
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
     }
   }
 
