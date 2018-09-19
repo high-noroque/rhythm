@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
-import { loginUser } from '../../actions/auth'
+import { loginUser } from '../../actions/authActions'
 import TextFieldGroup from '../common/TextFieldGroup'
 
 class Login extends Component {
